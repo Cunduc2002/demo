@@ -17,7 +17,7 @@ public class PDFGeneratorService {
         PdfWriter.getInstance(document, response.getOutputStream());
 
         // Define fonts
-        Font titleFont = new Font(Font.TIMES_ROMAN, 14, Font.BOLD | Font.ITALIC);
+        Font titleFont = new Font(Font.TIMES_ROMAN, 14, Font.BOLDITALIC);
         Font headerFont = new Font(Font.TIMES_ROMAN, 13, Font.BOLD);
         Font normalFont = new Font(Font.TIMES_ROMAN, 12, Font.NORMAL);
 
@@ -256,7 +256,7 @@ public class PDFGeneratorService {
 
         // "Quê quán:" label
 
-        PdfPCell hometownLabelCell = new PdfPCell(new Phrase("Quê quán:", normalFont));
+        PdfPCell hometownLabelCell = new PdfPCell(new Phrase("Quê quán:", headerFont));
         hometownLabelCell.setBorder(Rectangle.NO_BORDER);
         hometownLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         hometownTable.addCell(hometownLabelCell);
