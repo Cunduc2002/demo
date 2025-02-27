@@ -6,7 +6,10 @@ import com.lowagie.text.pdf.PdfPCell;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Service;
 
+import java.beans.Statement;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -17,9 +20,12 @@ public class PDFGeneratorService {
         PdfWriter.getInstance(document, response.getOutputStream());
 
         // Define fonts
-        Font titleFont = new Font(Font.TIMES_ROMAN, 14, Font.BOLDITALIC);
-        Font headerFont = new Font(Font.TIMES_ROMAN, 13, Font.BOLD);
-        Font normalFont = new Font(Font.TIMES_ROMAN, 12, Font.NORMAL);
+        // Define fonts
+        BaseFont baseFont = BaseFont.createFont("NotoSerif-VariableFont_wdth,wght.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+        Font titleFont = new Font(baseFont, 12, Font.BOLD | Font.ITALIC);
+        Font headerFont = new Font(baseFont, 10, Font.BOLD);
+        Font normalFont = new Font(baseFont, 10, Font.NORMAL);
+        Font normalFontItalic = new Font(baseFont, 10, Font.ITALIC);
 
         document.open();
 
@@ -84,13 +90,13 @@ public class PDFGeneratorService {
         soTable.setWidthPercentage(100);
 
         // First part: Số
-        PdfPCell soCell = new PdfPCell(new Phrase("Số: " + soNumber, headerFont));
+        PdfPCell soCell = new PdfPCell(new Phrase("Số: " + soNumber, normalFont));
         soCell.setBorder(Rectangle.NO_BORDER);
         soCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         soTable.addCell(soCell);
 
         // Second part: Date
-        PdfPCell dateCell = new PdfPCell(new Phrase("Houston, ngày " + new SimpleDateFormat("dd 'tháng' MM 'năm' yyyy").format(new Date()), headerFont));
+        PdfPCell dateCell = new PdfPCell(new Phrase("Houston, ngày " + new SimpleDateFormat("dd 'tháng' MM 'năm' yyyy").format(new Date()), normalFontItalic));
         dateCell.setBorder(Rectangle.NO_BORDER);
         dateCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
         soTable.addCell(dateCell);
@@ -135,13 +141,13 @@ public class PDFGeneratorService {
         headerTable.completeRow();
 
 
-        //Fetch value from mySQL example
+//Fetch value from mySQL example
         String dob = "03/09/2024";
-        String dobWritten = "Ngày mùng ba, tháng chín, năm hai nghìn không trăm hai mươi tư";
+        String dobWritten = "Ngày mùng ba, tháng chín, \nnăm hai nghìn không trăm hai mươi tư";
 
         PdfPTable dobTable = new PdfPTable(4);//create multi-column
         dobTable.setWidthPercentage(100);
-        dobTable.setWidths(new float[]{25, 20, 20, 35});//adjust column ratios
+        dobTable.setWidths(new float[]{25, 15, 15, 45});//adjust column ratios
 
         //"Ngay, thang, nam sinh:" label
         PdfPCell dobLabelCell = new PdfPCell(new Phrase("Ngày, tháng, năm sinh:", normalFont));
@@ -161,11 +167,12 @@ public class PDFGeneratorService {
         dobWrittenLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         dobTable.addCell(dobWrittenLabelCell);
 
-// Date written in words (wrap if needed)
+
+// Date written in words (with intelligent line breaks)
         PdfPCell dobWrittenValueCell = new PdfPCell(new Phrase(dobWritten, normalFont));
         dobWrittenValueCell.setBorder(Rectangle.NO_BORDER);
         dobWrittenValueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
-        dobWrittenValueCell.setNoWrap(false); // Allows wrapping if text is too long
+        dobWrittenValueCell.setNoWrap(false); // Allow wrapping
         dobTable.addCell(dobWrittenValueCell);
 
         headerTable.completeRow();
@@ -174,6 +181,7 @@ public class PDFGeneratorService {
         document.add(new Paragraph("\n")); // Add spacing after this section
 
         headerTable.completeRow();
+
 
         // Fetch values from MySQL (replace these with actual MySQL values)
         String gender = "Nam"; // Replace with actual value from MySQL
@@ -246,39 +254,37 @@ public class PDFGeneratorService {
 
         headerTable.completeRow();
 //Added "Quê quán:"
-        // Fetch "Quê quán" value from MySQL (Replace with actual data)
-        String hometown = "Thừa Thiên Huế, Việt Nam"; // Example value from MySQL
+        String hometown = "Hà Nội"; // fetched from MySQL, ensure the value is set correctly
 
-        // Create table for "Quê quán"
+        // Adjusting "Quê quán" table rendering to ensure uniform font rendering
         PdfPTable hometownTable = new PdfPTable(2);
         hometownTable.setWidthPercentage(100);
         hometownTable.setWidths(new float[]{20, 80}); // Adjust column width ratios
 
-        // "Quê quán:" label
-
-        PdfPCell hometownLabelCell = new PdfPCell(new Phrase("Quê quán:", headerFont));
+// "Quê quán:" label with consistent font
+        PdfPCell hometownLabelCell = new PdfPCell(new Phrase("Quê quán:", normalFont));
         hometownLabelCell.setBorder(Rectangle.NO_BORDER);
         hometownLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         hometownTable.addCell(hometownLabelCell);
 
-        // Hometown value from MySQL
+// Hometown value from MySQL with consistent font
         PdfPCell hometownValueCell = new PdfPCell(new Phrase(hometown, normalFont));
         hometownValueCell.setBorder(Rectangle.NO_BORDER);
         hometownValueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         hometownTable.addCell(hometownValueCell);
 
-        // Add the hometownTable to the document
+// Add to document
         document.add(hometownTable);
         document.add(new Paragraph("\n"));
         headerTable.completeRow();
 //Add Số định danh cá nhân:
-        String id = "...........................";
+        String id = ". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .";
         PdfPTable idTable = new PdfPTable(2); // Use two columns
         idTable.setWidthPercentage(100);
         idTable.setWidths(new float[]{30, 70});
 
         //Số định danh cá nhân: label
-        PdfPCell idTableLabelCell = new PdfPCell(new Phrase("Số định danh cá nhân:", headerFont));
+        PdfPCell idTableLabelCell = new PdfPCell(new Phrase("Số định danh cá nhân:", normalFont));
         idTableLabelCell.setBorder(Rectangle.NO_BORDER);
         idTableLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
         idTable.addCell(idTableLabelCell);
@@ -292,16 +298,391 @@ public class PDFGeneratorService {
 
         // Add the hometownTable to the document
         document.add(idTable);
+        document.add(new Paragraph("\n")); //space line down
+
+// Fetch motherName from MySQL (assuming you have a variable fullName) example
+        String fullMotherName = "ĐỖ HẢI KIM "; // Replace with the actual name from MySQL
+
+// Create table for "Họ, chữ đệm, tên người mẹ:"
+        PdfPTable motherNameTable = new PdfPTable(2);
+        motherNameTable.setWidthPercentage(100);
+        motherNameTable.setWidths(new float[]{30, 70}); // 30% label, 70% input
+
+        // Label cell
+        PdfPCell motherNameLabelCell = new PdfPCell(new Phrase("Họ, chữ đệm, tên người mẹ:", headerFont));
+        motherNameLabelCell.setBorder(Rectangle.NO_BORDER);
+        motherNameLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        motherNameTable.addCell(motherNameLabelCell);
+
+        // Name from MySQL
+        PdfPCell motherNameValueCell = new PdfPCell(new Phrase(fullMotherName, normalFont));
+        motherNameValueCell.setBorder(Rectangle.NO_BORDER);
+        motherNameValueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        motherNameTable.addCell(motherNameValueCell);
+
+        // Add the nameTable to the document
+        document.add(motherNameTable);
+        //space
+        document.add(new Paragraph("\n")); // Space after name field
+        headerTable.completeRow();
+
+//////here
+
+        // Fetch values from MySQL (replace these with actual MySQL values)
+        String motherBirth = "1990"; // Replace with actual value from MySQL
+        String motherEthnicity = "Kinh"; // Replace with actual value from MySQL
+        String motherNationality = "Việt Nam"; // This is static
+
+
+        // Create table for motherBirth, motherEthnicity, and motherNationality
+        PdfPTable infoTableMother = new PdfPTable(5);
+        infoTableMother.setWidthPercentage(100);
+        infoTableMother.setWidths(new float[]{15, 15, 15, 20, 35}); // Adjust column width ratios
+
+
+        // "Năm sinh:" label
+        PdfPCell birthLabelCell = new PdfPCell(new Phrase("Năm sinh:", normalFont));
+        birthLabelCell.setBorder(Rectangle.NO_BORDER);
+        birthLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableMother.addCell(birthLabelCell);
+
+        // Gender value from MySQL
+        PdfPCell motherValueCell = new PdfPCell(new Phrase(motherBirth, normalFont));
+        motherValueCell.setBorder(Rectangle.NO_BORDER);
+        motherValueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableMother.addCell(motherValueCell);
+
+        // "Dân tộc:" label
+        PdfPCell motherNameEthnicityLabelCell = new PdfPCell(new Phrase("Dân tộc:", normalFont));
+        motherNameEthnicityLabelCell.setBorder(Rectangle.NO_BORDER);
+        motherNameEthnicityLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableMother.addCell(motherNameEthnicityLabelCell);
+
+        // motherEthnicity value from MySQL
+        PdfPCell motherEthnicityValueCell = new PdfPCell(new Phrase(motherEthnicity, normalFont));
+        motherEthnicityValueCell.setBorder(Rectangle.NO_BORDER);
+        motherEthnicityValueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableMother.addCell(motherEthnicityValueCell);
+
+        // "Quốc tịch: Việt Nam" (Static text)
+        PdfPCell motherNationalityCell = new PdfPCell(new Phrase("Quốc tịch: " + motherNationality, normalFont));
+        motherNationalityCell.setBorder(Rectangle.NO_BORDER);
+        motherNationalityCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableMother.addCell(motherNationalityCell);
+
+        // Add the infoTableMother to the document
+        document.add(infoTableMother);
+        document.add(new Paragraph("\n")); // Add spacing after this section
+        headerTable.completeRow();
+
+//Added Nơi cư trú:
+        String motherPlaceOfBirth = "10505 Cowberry Ct, Vienna, VA 22182, Hoa Kì";
+
+        PdfPTable motherPlaceOfBirthTable = new PdfPTable(2);
+        motherPlaceOfBirthTable.setWidthPercentage(100);
+        motherPlaceOfBirthTable.setWidths(new float[]{20, 80});
+
+        //"Nơi cư trú:" label
+        PdfPCell motherPlaceOfBirthLabelCell = new PdfPCell(new Phrase("Nơi cư trú:", normalFont));
+        motherPlaceOfBirthLabelCell.setBorder(Rectangle.NO_BORDER);
+        motherPlaceOfBirthLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        motherPlaceOfBirthTable.addCell(placeOfBirthLabelCell);
+
+        //Take placeOfBirth content from MySQL
+        PdfPCell mohterPlaceOfBirthContentCell = new PdfPCell(new Phrase(motherPlaceOfBirth, normalFont));
+        mohterPlaceOfBirthContentCell.setBorder(Rectangle.NO_BORDER);
+        mohterPlaceOfBirthContentCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        motherPlaceOfBirthTable.addCell(mohterPlaceOfBirthContentCell);
+
+        //add placeOfBirthTable into doc
+        document.add(motherPlaceOfBirthTable);
         document.add(new Paragraph("\n"));
 
-        // Closing Signature Section
+////here is Dad table
+        // Fetch dadName from MySQL (assuming you have a variable fullName) example
+        String fullDadName = "DOAN DUC THO"; // Replace with the actual name from MySQL
+
+// Create table for "Họ, chữ đệm, tên người cha:"
+        PdfPTable dadNameTable = new PdfPTable(2);
+        dadNameTable.setWidthPercentage(100);
+        dadNameTable.setWidths(new float[]{30, 70}); // 30% label, 70% input
+
+        // Label cell
+        PdfPCell dadNameLabelCell = new PdfPCell(new Phrase("Họ, chữ đệm, tên người cha:", headerFont));
+        dadNameLabelCell.setBorder(Rectangle.NO_BORDER);
+        dadNameLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        dadNameTable.addCell(dadNameLabelCell);
+
+        // Name from MySQL
+        PdfPCell dadNameValueCell = new PdfPCell(new Phrase(fullDadName, normalFont));
+        dadNameValueCell.setBorder(Rectangle.NO_BORDER);
+        dadNameValueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        dadNameTable.addCell(dadNameValueCell);
+
+        // Add the nameTable to the document
+        document.add(dadNameTable);
+        //space
+        document.add(new Paragraph("\n")); // Space after name field
+        headerTable.completeRow();
+
+//////here
+
+        // Fetch values from MySQL (replace these with actual MySQL values)
+        String dadBirth = "1979"; // Replace with actual value from MySQL
+        String dadEthnicity = "Kinh"; // Replace with actual value from MySQL
+        String dadNationality = "Việt Nam"; // This is static
+
+
+        // Create table for motherBirth, motherEthnicity, and motherNationality
+        PdfPTable infoTableDad = new PdfPTable(5);
+        infoTableDad.setWidthPercentage(100);
+        infoTableDad.setWidths(new float[]{15, 15, 15, 20, 35}); // Adjust column width ratios
+
+
+        // "Năm sinh bố:" label
+        PdfPCell dadBirthLabelCell = new PdfPCell(new Phrase("Năm sinh:", normalFont));
+        dadBirthLabelCell.setBorder(Rectangle.NO_BORDER);
+        dadBirthLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableDad.addCell(dadBirthLabelCell);
+
+        // Gender value from MySQL
+        PdfPCell dadValueCell = new PdfPCell(new Phrase(dadBirth, normalFont));
+        dadValueCell.setBorder(Rectangle.NO_BORDER);
+        dadValueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableDad.addCell(dadValueCell);
+
+        // "Dân tộc:" label
+        PdfPCell dadEthnicityLabelCell = new PdfPCell(new Phrase("Dân tộc:", normalFont));
+        dadEthnicityLabelCell.setBorder(Rectangle.NO_BORDER);
+        dadEthnicityLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableDad.addCell(dadEthnicityLabelCell);
+
+        // motherEthnicity value from MySQL
+        PdfPCell dadEthnicityValueCell = new PdfPCell(new Phrase(dadEthnicity, normalFont));
+        dadEthnicityValueCell.setBorder(Rectangle.NO_BORDER);
+        dadEthnicityValueCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableDad.addCell(dadEthnicityValueCell);
+
+        // "Quốc tịch: Việt Nam" (Static text)
+        PdfPCell dadNationalityCell = new PdfPCell(new Phrase("Quốc tịch: " + dadNationality, normalFont));
+        dadNationalityCell.setBorder(Rectangle.NO_BORDER);
+        dadNationalityCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        infoTableDad.addCell(dadNationalityCell);
+
+        // Add the infoTableDad to the document
+        document.add(infoTableDad);
+        document.add(new Paragraph("\n")); // Add spacing after this section
+        headerTable.completeRow();
+
+//Added Nơi cư trú:
+        String dadPlaceOfBirth = "10505 Cowberry Ct, Vienna, VA 22182, Hoa Kì";
+
+        PdfPTable dadPlaceOfBirthTable = new PdfPTable(2);
+        dadPlaceOfBirthTable.setWidthPercentage(100);
+        dadPlaceOfBirthTable.setWidths(new float[]{20, 80});
+
+        //"Nơi cư trú:" label
+        PdfPCell dadPlaceOfBirthLabelCell = new PdfPCell(new Phrase("Nơi cư trú:", normalFont));
+        dadPlaceOfBirthLabelCell.setBorder(Rectangle.NO_BORDER);
+        dadPlaceOfBirthLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        dadPlaceOfBirthTable.addCell(dadPlaceOfBirthLabelCell);
+
+        //Take placeOfBirth content from MySQL
+        PdfPCell dadPlaceOfBirthContentCell = new PdfPCell(new Phrase(dadPlaceOfBirth, normalFont));
+        dadPlaceOfBirthContentCell.setBorder(Rectangle.NO_BORDER);
+        dadPlaceOfBirthContentCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        dadPlaceOfBirthTable.addCell(dadPlaceOfBirthContentCell);
+
+        //add placeOfBirthTable into doc
+        document.add(dadPlaceOfBirthTable);
         document.add(new Paragraph("\n"));
+
+
+        String Birth_certificate_registration_place = "Cơ quan hộ tịch bang California, Hoa Kì";
+// Đăng ký khai sinh tại:
+        PdfPTable Birth_certificate_registration_table = new PdfPTable(2);
+        Birth_certificate_registration_table.setWidthPercentage(100);
+        Birth_certificate_registration_table.setWidths(new float[]{30, 70}); // 30% label, 70% input
+
+        // Label cell
+        PdfPCell Birth_certificate_registration_LabelCell = new PdfPCell(new Phrase("Đăng ký khai sinh tại:", headerFont));
+        Birth_certificate_registration_LabelCell.setBorder(Rectangle.NO_BORDER);
+        Birth_certificate_registration_LabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        Birth_certificate_registration_table.addCell(Birth_certificate_registration_LabelCell);
+
+        // Name from MySQL
+        PdfPCell Birth_certificate_registration_NameValueCell = new PdfPCell(new Phrase(Birth_certificate_registration_place, normalFont));
+        Birth_certificate_registration_NameValueCell.setBorder(Rectangle.NO_BORDER);
+        Birth_certificate_registration_NameValueCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        Birth_certificate_registration_table.addCell(Birth_certificate_registration_NameValueCell);
+
+        // Add the Birth_certificate_registration_table to the document
+        document.add(Birth_certificate_registration_table);
+        //space
+        document.add(new Paragraph("\n")); // Space after name field
+        headerTable.completeRow();
+
+
+        // Hardcoded values (simulating data from MySQL)
+        String numberFromMySQL = "123456"; // Birth certificate number
+        String dateFromMySQL = "2024-09-03"; // Birth date (simulating MySQL value)
+
+
+// Concatenate the values into the desired string
+        String khaiSinhSo = "Khai sinh số: " + numberFromMySQL + " , cấp ngày " + dateFromMySQL + ".";
+
+// Now, create the PDF table and add this string to the table
+        PdfPTable khaiSinhSoTable = new PdfPTable(1); // Create multi-column table
+        khaiSinhSoTable.setWidthPercentage(100);
+        khaiSinhSoTable.setWidths(new float[]{100}); // Adjust column ratios
+
+// Add the "Khai sinh số" and date string to the table
+        PdfPCell khaiSinhSoCell = new PdfPCell(new Phrase(khaiSinhSo, normalFont));
+        khaiSinhSoCell.setBorder(Rectangle.NO_BORDER); // Remove border for cleaner layout
+        khaiSinhSoCell.setHorizontalAlignment(Element.ALIGN_LEFT); // Align to left
+        khaiSinhSoTable.addCell(khaiSinhSoCell);
+
+// Continue with other cells...
+        document.add(khaiSinhSoTable);
+        document.add(new Paragraph("\n")); // Space after name field
+        headerTable.completeRow();
+
+//Đã được ký vào Sổ đăng ký khai sinh: table
+        String empty = "";
+
+        // Now, create the PDF table and add this string to the table
+        PdfPTable SoDangKyKhaiSinhTable = new PdfPTable(2); // Create multi-column table
+        SoDangKyKhaiSinhTable.setWidthPercentage(100);
+        SoDangKyKhaiSinhTable.setWidths(new float[]{40, 60}); // Adjust column ratios
+
+
+        //"Đã được ký vào Sổ đăng ký khai sinh::" label
+        PdfPCell SoDangKyKhaiSinhLabelCell = new PdfPCell(new Phrase("Đã được ký vào Sổ đăng ký khai sinh:", headerFont));
+        SoDangKyKhaiSinhLabelCell.setBorder(Rectangle.NO_BORDER);
+        SoDangKyKhaiSinhLabelCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        SoDangKyKhaiSinhTable.addCell(SoDangKyKhaiSinhLabelCell);
+
+        //Take placeOfBirth content from MySQL
+        PdfPCell SoDangKyKhaiSinhContentCell = new PdfPCell(new Phrase(empty, normalFont));
+        SoDangKyKhaiSinhContentCell.setBorder(Rectangle.NO_BORDER);
+        SoDangKyKhaiSinhContentCell.setHorizontalAlignment(Element.ALIGN_LEFT);
+        SoDangKyKhaiSinhTable.addCell(SoDangKyKhaiSinhContentCell);
+
+        document.add(SoDangKyKhaiSinhTable);
+
+// Optionally, add some space after this section
+        document.add(new Paragraph("\n"));
+
+//Họ, chữ đệm, tên người yêu cầu ghi vào Sổ hộ tịch việc khai sinh:"
+        // The label and the value (these could be fetched from the database or hardcoded for now)
+        String singerName = "ĐỖ HẢI KIM"; // This could be the value fetched from MySQL
+
+// Create a table with two columns (for label and value)
+        PdfPTable signerNameTable = new PdfPTable(2); // Create a table with 2 columns
+        signerNameTable.setWidthPercentage(100); // Set table width to 100%
+        signerNameTable.setWidths(new float[]{66, 34}); // Adjust column ratios (40% for label, 60% for value)
+
+// Add the label cell (Họ, chữ đệm, tên...)
+        PdfPCell labelCell = new PdfPCell(new Phrase("Họ, chữ đệm, tên người yêu cầu ghi vào Sổ hộ tịch việc khai sinh:", normalFont));
+        labelCell.setBorder(Rectangle.NO_BORDER); // No border for the label cell
+        labelCell.setHorizontalAlignment(Element.ALIGN_LEFT); // Align left
+        signerNameTable.addCell(labelCell);
+
+
+// Add the value cell (e.g., ĐỖ HẢI KIM)
+        PdfPCell singerNameValueCell = new PdfPCell(new Phrase(singerName, normalFont));
+        singerNameValueCell.setBorder(Rectangle.NO_BORDER); // No border for the value cell
+        singerNameValueCell.setHorizontalAlignment(Element.ALIGN_LEFT); // Align left
+        signerNameTable.addCell(singerNameValueCell);
+
+        document.add(signerNameTable);
+        document.add(new Paragraph("\n"));
+
+//Giấy tờ tùy thân
+// Simulating MySQL values
+        String identityDocument = "Giấy tờ tùy thân: "; // Static part
+        String firstName = "John Doe";  // From MySQL, let's assume this comes from a database
+        String documentNumber = "123456"; // Document number, also from MySQL
+        String additionalInfo = "Additional Info"; // Some other field from the database, maybe 'Dữ liêu'!U41
+
+// Check if firstName is empty and use documentNumber or firstName based on that
+        String finalText = identityDocument + (firstName.isEmpty() ? documentNumber : firstName) + " - " + additionalInfo;
+
+// Now let's use this finalText in a PDF document
+
+
+        PdfPTable table = new PdfPTable(1); // 1 column table
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{100}); // Adjust column width to 100%
+
+// Add the final concatenated string into a cell
+        PdfPCell cell = new PdfPCell(new Phrase(finalText, normalFont));
+        cell.setBorder(Rectangle.NO_BORDER); // No border for a cleaner look
+        cell.setHorizontalAlignment(Element.ALIGN_LEFT); // Align left
+        table.addCell(cell);
+
+// Add the table to the document
+        document.add(table);
+
+// Add a line break after the table
+        document.add(new Paragraph("\n"));
+
+// Add the footer at the bottom of the first page
         Paragraph footer = new Paragraph("KT. TỔNG LÃNH SỰ\nPHÓ TỔNG LÃNH SỰ", headerFont);
-        footer.setAlignment(Element.ALIGN_RIGHT);
+        footer.setAlignment(Element.ALIGN_RIGHT); // Right-align the footer
         document.add(footer);
 
+// String signingPerson is fetched dynamically from MySQL or set as needed
+        String signingPerson = "Đặng Bảo Châu"; // Placeholder for the person signing
+
+// Step 3: Add the name of the person signing in a cell below the footer
+// Create a table with 1 row and 1 column
+        PdfPTable tableSigner = new PdfPTable(1);
+        tableSigner.setWidthPercentage(100); // Set table width
+
+// Add the cell with the name of the signing person
+        PdfPCell cellSigner = new PdfPCell(new Phrase(signingPerson, headerFont));
+        cellSigner.setBorder(Rectangle.NO_BORDER); // Remove border around the cell
+        cellSigner.setHorizontalAlignment(Element.ALIGN_RIGHT); // Align to the right
+        // Move the text a little to the left by reducing the right padding
+        cellSigner.setPaddingRight(10f); // Adjust this value to move it a little to the left
+
+// Add the cell to the table
+        tableSigner.addCell(cellSigner);
+
+// Add the table below the footer, on the first page
+        document.add(tableSigner);
+
+// Force the second table to be on the next page
+        document.newPage(); // Start a new page
+
+// Add the second table with "Số" and "Ngày, tháng, năm đăng ký"
+        PdfPTable soTable2 = new PdfPTable(2);
+        soTable2.setWidthPercentage(100);
+
+// First part: Số (Number)
+        PdfPCell soCell2 = new PdfPCell(new Phrase("Số: " + soNumber, normalFont));
+        soCell2.setBorder(Rectangle.NO_BORDER);
+        soCell2.setHorizontalAlignment(Element.ALIGN_LEFT);
+        soTable2.addCell(soCell2);
+
+// Second part: Date (Ngày, tháng, năm đăng ký)
+        PdfPCell dateCell2 = new PdfPCell(new Phrase("Ngày, tháng, năm đăng ký: " +
+                new SimpleDateFormat("dd 'tháng' MM 'năm' yyyy").format(new Date()), normalFont));
+        dateCell2.setBorder(Rectangle.NO_BORDER);
+        dateCell2.setHorizontalAlignment(Element.ALIGN_RIGHT);
+        soTable2.addCell(dateCell2);
+
+// Add the second table to the document (on the second page)
+        document.add(soTable2);
+
+// Add one space below the table
+        document.add(new Paragraph("\n"));
+
+// Closing the document
         document.close();
     }
+
 
     private void addTableCell(PdfPTable table, String text, Font font) {
         PdfPCell cell = new PdfPCell(new Phrase(text, font));
